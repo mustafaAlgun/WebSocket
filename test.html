@@ -1,0 +1,139 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css"
+        integrity="sha384-9aIt2nRpC12Uk9gS9baDl411NQApFmC26EwAOH8WgZl5MYYxFfc+NcPb1dKGj7Sk" crossorigin="anonymous">
+
+    <title>EE444 Project</title>
+
+    <style>
+        html,
+        body {
+            background-color: #222;
+        }
+
+        .main-block {
+            position: absolute;
+            top: 0;
+            right: 0;
+            bottom: 0;
+            left: 0;
+            padding: 20px;
+            min-height: 100vh;
+            background-color: #444;
+            box-shadow: 0 0 10px 5px rgba(0, 0, 0, 0.5);
+        }
+
+        .chat-area {
+            margin: 10px;
+            padding: 0;
+            background-color: #ccc;
+            color: #000;
+            border-radius: 5px;
+            overflow: auto;
+            box-shadow: 0 0 10px 5px rgb(0, 0, 0, 0.5);
+        }
+
+        .chat-message {
+            margin-top: 4px;
+            margin-bottom: 4px;
+            box-shadow: 0 0 4px 2px rgba(0, 0, 0, 0.3);
+            border-radius: 4px;
+            background-color: #fff;
+            overflow: hidden;
+            overflow-wrap: break-word;
+        }
+
+        .chat-username {
+            margin: 4px;
+            color: #fff;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Modal -->
+    <div id="exampleModal" class="modal fade" tabindex="-1" role="dialog">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Error</h5>
+                    <button type="button" class="close" data-dismiss="modal">
+                        <span>&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <p>Could not connect to WebSocket server. Please refresh this page to try again.</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container d-flex flex-column main-block">
+        <div class="row">
+            <div class="col">
+                <h1 style="color: #fff;">EE444 Browser WebSocket Client</h1>
+            </div>
+        </div>
+        <div class="row flex-grow-1 chat-area">
+            <div class="col">
+                <div id="chat-div">
+                </div>
+            </div>
+        </div>
+        <form id="frm-send">
+            <div class="row">
+                <div class="col">
+                    <div class="input-group">
+                        <input type="text" class="form-control" autocomplete="off" id="txt-message" placeholder="Say something...">
+                        <div class="input-group-append">
+                            <button type="submit" class="btn btn-primary">Send</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/js/bootstrap.min.js"></script>
+
+    <script>
+        var ws;
+
+        $(document).ready(function () {
+            ws = new WebSocket("ws://localhost:5000");
+            ws.onerror = function (e) {
+                $("#exampleModal").modal("show");
+            }
+            ws.onmessage = function (e) {
+                var frame = e.data;
+                var elem = '<p class="chat-message"><span class="badge chat-username badge-danger">Server says:</span>' + frame + '</p>';
+                
+                $("#chat-div").append(elem);
+                $(".chat-area").scrollTop($("#chat-div").height());
+            };
+        });
+
+        $("#frm-send").on("submit", function (e) {
+            var msg = $("#txt-message").val();
+            if (msg !== "") {
+                ws.send(msg);
+                $("#txt-message").val("");
+            }
+            e.preventDefault();
+        });
+    </script>
+</body>
+
+</html>
